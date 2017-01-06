@@ -1,0 +1,21 @@
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='search.css')}}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Enter your post code:</h2>
+            <div id="custom-search-input">
+                <div>
+                    <form action='.', method="POST" class="input-group col--12" style="margin:0">
+                        <input type="text" class="form-control input-lg" name='post_code'/>
+                        <span class="input-group-btn">
+                            <button class="btn btn-info btn-lg" type="button submit">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </span>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
