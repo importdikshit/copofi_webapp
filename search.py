@@ -27,10 +27,36 @@ def search():
 		#get the k closest post codes
 		k=10
 		top_k = k_closest_postcodes(k, post_code)
+		#Remove space from all post codes upon Ishan's request
+		top_k = [re.sub(" ", "", i) for i in top_k]
 		print(top_k)
 
-		
-		return "Done"
+		return redirect(url_for('dashboard'))
+
+@app.route('/main')
+def dashboard():
+	return render_template('main.html')
+
+@app.route('/viz1')
+def vis1():
+	return "Viz1"
+
+@app.route('/viz2')
+def vis2():
+	return "Viz2"
+
+@app.route('/viz3')
+def vis3():
+	return "Viz3"
+
+@app.route('/viz4')
+def vis4():
+	return "Viz4"
+
+@app.route('/viz5')
+def vis5():
+	return "Viz5"
+
 
 if __name__ == '__main__':
    app.run(debug=True)

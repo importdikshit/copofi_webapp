@@ -1,6 +1,8 @@
 import pandas as pd
 import time
 import numpy as np
+import warnings
+warnings.filterwarnings('ignore')
 
 zips = pd.read_csv('zips_coordinates.csv')
 
