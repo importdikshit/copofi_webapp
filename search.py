@@ -1,34 +1,55 @@
-from flask import Flask, redirect, url_for, request, render_template
+from flask import Flask, redirect, url_for, request, render_template, flash
 import re
-from closest_postcodes import k_closest_postcodes
+import numpy as np
+from closest_postcodes import k_closest_postcodes, get_zip_coords
 import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+import warnings
+import json
+warnings.filterwarnings('ignore')
 
 app = Flask(__name__)
+app.secret_key = 'some_secret'
 
-def process_postcode(code):
-	"""Convert in the same format as in zips_coordinates.csv"""
-	#Step 1: convert all to upper and remove spaces
-	code = code.upper()
-	code = re.sub(" ", "", code)
-	#Step 2: Add a space between first 3 and last 3 letters
-	code = code[:3]+" "+code[3:]
-	return code
+key = "AIzaSyDm4Ft5drUeDbn3FD4Rg3_jhfZOEN4QSrE" #Google Maps Geocoding API key
+url1 = "https://maps.googleapis.com/maps/api/geocode/json?address="
+url2 = "W&key="
+
 
 @app.route('/', methods=['GET', 'POST'])
 def search():
 	if request.method=='GET':
 		return render_template('search.html')
 	elif request.method=='POST':
-		post_code  = request.form['post_code']
-		
-		#process the post_code to put in the right format
-		post_code = process_postcode(post_code)
+		address  = request.form['place']
 
-		#get the k closest post codes
-		k=10
-		top_k = k_closest_postcodes(k, post_code)
-		#Remove space from all post codes upon Ishan's request
-		top_k = [re.sub(" ", "", i) for i in top_k]
+	if address.isupper() and " " not in address:
+		#it is a zipcode
+		lat, lon = get_zip_coords(address)
+	else:
+		#Get the coordinates of the place we are looking for the given location
+		url = url1+address+url2+key
+		try:
+			google_results = requests.get(url).json()['results'][0]['geometry']['location']
+		except IndexError as e:
+			flash("An error occured. Try another area or try to be more specific!")
+			return render_template("search.html")
+		
+		lat = google_results['lat']
+		lon = google_results['lng']
+
+	#Run knn with the above latitude and longitude
+	k=10
+	top_k = k_closest_postcodes(k, lat, lon)
+
+	if len(top_k)==0:
+		try:
+			raise ValueError
+		except ValueError:
+			flash("No properties found in that area! Try another area or try to be more specific!")
+			return render_template("search.html")
+	else:
 		print(top_k)
 
 		return redirect(url_for('dashboard'))
