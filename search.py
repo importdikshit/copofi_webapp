@@ -2,6 +2,7 @@ from flask import Flask, redirect, url_for, request, render_template, flash
 import re
 import numpy as np
 from closest_postcodes import k_closest_postcodes, get_zip_coords
+from API.airbnb_api import *
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
@@ -33,6 +34,7 @@ def search():
 		try:
 			google_results = requests.get(url).json()['results'][0]['geometry']['location']
 		except IndexError as e:
+			print(requests.get(url).json())
 			flash("An error occured. Try another area or try to be more specific!")
 			return render_template("search.html")
 		
@@ -47,11 +49,24 @@ def search():
 		try:
 			raise ValueError
 		except ValueError:
+			print(requests.get(url).json())
 			flash("No properties found in that area! Try another area or try to be more specific!")
 			return render_template("search.html")
 	else:
-		print(top_k)
+		print("---------------------------------------")
+		print("Top 10 ZIPS: ",top_k)
+		print("---------------------------------------")
+		closest_zip = top_k[0]
+		print("Closest ZIPCODE: ", closest_zip)
+		print("---------------------------------------")
 
+		# # #Query Airbnb for all the properties in that zipcode
+		# overview_data = overview(closest_zip+"-London")
+		# room_ids = overview_data[2]
+		# # host_id = overview_data[3]
+
+		# # # Get df for room_ids
+		# rooms_df = rooms(room_ids)
 		return redirect(url_for('dashboard'))
 
 @app.route('/main')
@@ -60,6 +75,7 @@ def dashboard():
 
 @app.route('/viz1')
 def vis1():
+	
 	return "Viz1"
 
 @app.route('/viz2')
